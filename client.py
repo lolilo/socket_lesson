@@ -2,6 +2,8 @@ import socket
 import sys
 import select
 
+# get two python programs to talk to each other over a network.
+
 # connecting to a socket is analogous to opening a file. 
 # receiving data is analogous to reading a file
 
@@ -12,7 +14,8 @@ my_socket.connect(("localhost", 5555))
 # select.select() will wait until data is ready to be read
 running = True
 while running:
-    inputready, outputready, exceptready = select.select([my_socket], [sys.stdin], [])
+    inputready, outputready, exceptready = select.select([my_socket, sys.stdin], [], [])
+# for this exercise we only care about reading...WHY.
 
 # three lists of arguments for input:
 
@@ -21,15 +24,29 @@ while running:
 # A list to check if they have an exception
 
 
-    # for this exercise we only care about reading...WHY.
+    
     for s in inputready:
-        msg = s.recv(1024)
+        # what connection type was returned? 
 
-        if msg:
-            print msg
-        else:
-            print "Disconnected from server!"
-            running = False
+        if s == my_socket:
+            msg = s.recv(1024)
+
+            if msg:
+                print msg
+            else:
+                print "Disconnected from server!"
+                running = False
+
+        else: 
+            # get a line of input from the user (keyboard) 
+            user_input = s.readline()
+
+            # send input to server socket
+            my_socket.sendall(user_input)
+
+
+
+
 
 # receive 1024 bytes from the socket and display them
 data = my_socket.recv(1024)
